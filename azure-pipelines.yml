@@ -1,17 +1,16 @@
-# HTML
-# Archive your static HTML project and save it with the build record.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
-trigger:
-- main
-
-pool:
-  vmImage: ubuntu-latest
+variables:
+  buildConfiguration: 'Release'
 
 steps:
-- task: ArchiveFiles@2
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'dotnet build $(buildConfiguration)'
+- task: DotNetCoreCLI@2
   inputs:
-    rootFolderOrFile: '$(build.sourcesDirectory)'
-    includeRootFolder: false
-- task: PublishBuildArtifacts@1
+    command: 'publish'
+    publishWebProjects: true
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'apptestdevops'
+    appType: 'webAppLinux'
+    appName: 'apptestdevopssf'
+    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
